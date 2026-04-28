@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDTU — ER Diagramma</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Unbounded:wght@400;700;900&display=swap');
+
+:root {
+  --bg: #f5f0e8;
+  --paper: #fffdf7;
+  --ink: #1a1410;
+  --ink2: #4a3f35;
+  --red: #c0392b;
+  --blue: #1a4a8a;
+  --green: #1a6a3a;
+  --gold: #b8860b;
+  --border: #c8b89a;
+  --shadow: rgba(26,20,16,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* Qog'oz teksturasi */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(180,160,120,0.07) 28px, rgba(180,160,120,0.07) 29px),
+    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(180,160,120,0.05) 28px, rgba(180,160,120,0.05) 29px);
+  pointer-events:none; z-index:0;
+}
+
+/* ── SARLAVHA ── */
+.header {
+  position:relative; z-index:10;
+  text-align:center;
+  padding: 32px 20px 20px;
+  border-bottom: 3px double var(--ink);
+  background: var(--paper);
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.univ-badge {
+  display:inline-block;
+  border: 2px solid var(--ink);
+  padding: 4px 16px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink2);
+  margin-bottom: 10px;
+}
+
+.header h1 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(16px, 4vw, 26px);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.header h1 span { color: var(--red); }
+
+.header-sub {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--ink2);
+  letter-spacing: 1px;
+}
+
+.header-meta {
+  display:flex;
+  justify-content:center;
+  gap: 24px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.meta-chip {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 3px 12px;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+/* ── TABS ── */
+.tabs {
+  position:relative; z-index:10;
+  display:flex;
+  background: var(--paper);
+  border-bottom: 2px solid var(--ink);
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 10px 20px;
+  border:none;
+  border-right: 1px solid var(--border);
+  background: transparent;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--ink2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+
+.tab:hover { background: var(--bg); }
+.tab.active {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ── LEGEND ── */
+.legend {
+  position:relative; z-index:10;
+  display:flex; gap:20px; flex-wrap:wrap;
+  padding: 10px 20px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--ink2);
+}
+
+.leg { display:flex; align-items:center; gap:5px; }
+.leg-dot { width:10px; height:10px; border-radius:50%; border:1px solid; }
+
+/* ── CONTENT ── */
+.content {
+  position:relative; z-index:5;
+  padding: 24px 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section { display:none; }
+.section.active { display:block; }
+
+/* ── MODULE ── */
+.module { margin-bottom: 28px; }
+
+.module-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink2);
+  margin-bottom: 12px;
+  display:flex; align-items:center; gap:10px;
+}
+
+.module-label::after {
+  content:'';
+  flex:1;
+  height:1px;
+  background: repeating-linear-gradient(90deg, var(--border) 0, var(--border) 4px, transparent 4px, transparent 8px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+/* ── ENTITY KARTA ── */
+.entity {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.entity:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.entity-head {
+  padding: 9px 12px;
+  border-bottom: 1.5px solid var(--ink);
+  display:flex; align-items:center; gap:8px;
+}
+
+.entity-icon {
+  font-size: 14px;
+  flex-shrink:0;
+}
+
+.entity-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  flex:1;
+}
+
+.entity-tag {
+  font-size: 8px;
+  padding: 1px 6px;
+  border: 1px solid;
+  letter-spacing: 1px;
+}
+
+/* Modul ranglari */
+.m0 .entity-head { background: #e8f0f8; border-color: var(--blue); }
+.m0 .entity      { border-color: var(--blue); box-shadow: 3px 3px 0 var(--blue); }
+.m0 .entity-tag  { color: var(--blue); border-color: var(--blue); }
+.m0:hover        { box-shadow: 4px 4px 0 var(--blue) !important; }
+
+.m1 .entity-head { background: #f8ece8; border-color: var(--red); }
+.m1 .entity      { border-color: var(--red); box-shadow: 3px 3px 0 var(--red); }
+.m1 .entity-tag  { color: var(--red); border-color: var(--red); }
+.m1:hover        { box-shadow: 4px 4px 0 var(--red) !important; }
+
+.m2 .entity-head { background: #e8f5ec; border-color: var(--green); }
+.m2 .entity      { border-color: var(--green); box-shadow: 3px 3px 0 var(--green); }
+.m2 .entity-tag  { color: var(--green); border-color: var(--green); }
+.m2:hover        { box-shadow: 4px 4px 0 var(--green) !important; }
+
+.m3 .entity-head { background: #faf3e0; border-color: var(--gold); }
+.m3 .entity      { border-color: var(--gold); box-shadow: 3px 3px 0 var(--gold); }
+.m3 .entity-tag  { color: var(--gold); border-color: var(--gold); }
+.m3:hover        { box-shadow: 4px 4px 0 var(--gold) !important; }
+
+.m4 .entity-head { background: #f0e8f5; border-color: #7b2d8b; }
+.m4 .entity      { border-color: #7b2d8b; box-shadow: 3px 3px 0 #7b2d8b; }
+.m4 .entity-tag  { color: #7b2d8b; border-color: #7b2d8b; }
+.m4:hover        { box-shadow: 4px 4px 0 #7b2d8b !important; }
+
+/* Fieldlar */
+.field {
+  display:flex; align-items:center; gap:6px;
+  padding: 4px 12px;
+  font-size: 10.5px;
+  border-bottom: 1px dotted var(--border);
+  transition: background 0.1s;
+}
+.field:last-child { border-bottom: none; }
+.field:hover { background: var(--bg); }
+
+.fi { width:14px; text-align:center; font-size:9px; flex-shrink:0; }
+.pk-i { color: var(--gold); }
+.fk-i { color: var(--green); }
+.at-i { color: var(--ink2); }
+
+.fn { flex:1; font-size:10.5px; }
+.fn.pk { color: var(--gold); font-weight:600; }
+.fn.fk { color: var(--green); }
+
+.ft { font-size:9px; color: var(--ink2); }
+.badge-nn { font-size:8px; color:var(--red); margin-left:2px; }
+
+.divider {
+  height:1px;
+  background: repeating-linear-gradient(90deg, var(--border) 0, var(--border) 3px, transparent 3px, transparent 6px);
+  margin: 0 8px;
+}
+
+/* ── RELATIONS TABLE ── */
+.rtable {
+  width:100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.rtable th {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 8px 12px;
+  text-align:left;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 9px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.rtable td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.rtable tr:hover td { background: var(--bg); }
+
+.rtag {
+  display:inline-block;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight:700;
+  border: 1px solid;
+  letter-spacing:0.5px;
+}
+
+.rt-1n  { color:var(--blue);  border-color:var(--blue);  background:#e8f0f8; }
+.rt-mm  { color:#7b2d8b;      border-color:#7b2d8b;      background:#f0e8f5; }
+.rt-11  { color:var(--green); border-color:var(--green);  background:#e8f5ec; }
+
+/* ── SQL BLOK ── */
+.sql-wrap {
+  background: #1a1410;
+  border: 1.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.sql-bar {
+  background: #2d2520;
+  padding: 8px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom: 1px solid #3d3530;
+}
+
+.sql-title { font-size:11px; color:#d4c5a9; letter-spacing:1px; }
+
+.copy-btn {
+  background: #3d3530;
+  border: 1px solid #5d5550;
+  color: #d4c5a9;
+  padding: 3px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.copy-btn:hover { background: #5d5550; }
+
+.sql-code {
+  padding: 16px;
+  font-size: 11px;
+  line-height: 1.8;
+  overflow-x: auto;
+  color: #d4c5a9;
+}
+
+.kw  { color: #e06c75; }
+.tp  { color: #61afef; }
+.st  { color: #98c379; }
+.cm  { color: #5c6370; font-style:italic; }
+.tb  { color: #e5c07b; }
+.cn  { color: #c678dd; }
+
+/* ── NORMALIZATSIYA ── */
+.norm-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap:14px;
+}
+
+.norm-card {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 16px;
+}
+
+.norm-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 12px;
+  font-weight:700;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.norm-rule {
+  font-size: 10.5px;
+  color: var(--ink2);
+  margin-bottom: 6px;
+  padding-left: 12px;
+  position:relative;
+  line-height:1.5;
+}
+.norm-rule::before {
+  content:'✓';
+  position:absolute; left:0;
+  color: var(--green);
+  font-weight:700;
+}
+
+/* ── PRINT ── */
+@media print {
+  body { background:white; }
+  body::before { display:none; }
+  .tabs, .legend { display:none; }
+  .section { display:block !important; }
+  .entity { box-shadow:none; border:1px solid #333; }
+  .sql-wrap { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- SARLAVHA -->
+<div class="header">
+  <div class="univ-badge">Farg'ona Davlat Texnika Universiteti · FDTU</div>
+  <h1>TALABALAR AXBOROT TIZIMI<br><span>ER — Munosabatlar Diagrammasi</span></h1>
+  <div class="header-sub">Ma'lumotlar Bazasi · Relyatsion Model · Mustaqil Ish</div>
+  <div class="header-meta">
+    <div class="meta-chip">17 JADVAL</div>
+    <div class="meta-chip">5 MODUL</div>
+    <div class="meta-chip">28 MUNOSABAT</div>
+    <div class="meta-chip">3NF NORMALIZATSIYA</div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#b8860b;border-color:#b8860b"></div> PK — Asosiy kalit</div>
+  <div class="leg"><div class="leg-dot" style="background:#1a6a3a;border-color:#1a6a3a"></div> FK — Tashqi kalit</div>
+  <div class="leg"><div class="leg-dot" style="background:#4a3f35;border-color:#c8b89a"></div> Atribut</div>
+  <div class="leg"><span style="color:#c0392b;font-weight:700">NN</span> — NOT NULL</div>
+  <div class="leg"><div class="leg-dot" style="background:#1a4a8a"></div> Ta'lim moduli</div>
+  <div class="leg"><div class="leg-dot" style="background:#c0392b"></div> Xodimlar</div>
+  <div class="leg"><div class="leg-dot" style="background:#1a6a3a"></div> Moliya</div>
+  <div class="leg"><div class="leg-dot" style="background:#b8860b"></div> Infratuzilma</div>
+  <div class="leg"><div class="leg-dot" style="background:#7b2d8b"></div> Kutubxona</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="show('er')">📐 ER Diagramma</button>
+  <button class="tab" onclick="show('rel')">🔗 Munosabatlar</button>
+  <button class="tab" onclick="show('norm')">📋 Normalizatsiya</button>
+  <button class="tab" onclick="show('sql')">💾 SQL Skript</button>
+</div>
+
+<div class="content">
+
+<!-- ══════════════ ER DIAGRAMMA ══════════════ -->
+<div class="section active" id="er">
+
+  <!-- TA'LIM MODULI -->
+  <div class="module">
+    <div class="module-label">🎓 Ta'lim Moduli</div>
+    <div class="grid">
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🏫</span>
+            <span class="entity-name">FAKULTET</span>
+            <span class="entity-tag">ASOSIY</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">fakultet_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nomi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(150)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">qisqartma</span><span class="ft">VARCHAR(10) UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">tashkil_yili</span><span class="ft">YEAR</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">dekan_id</span><span class="ft">INT FK→XODIM</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">telefon</span><span class="ft">VARCHAR(20)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">email</span><span class="ft">VARCHAR(100)</span></div>
+        </div>
+      </div>
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🏛️</span>
+            <span class="entity-name">KAFEDRA</span>
+            <span class="entity-tag">ASOSIY</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">kafedra_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nomi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(150)</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">fakultet_id</span><span class="ft">INT FK→FAKULTET</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">mudiri_id</span><span class="ft">INT FK→XODIM</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">tashkil_yili</span><span class="ft">YEAR</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">email</span><span class="ft">VARCHAR(100)</span></div>
+        </div>
+      </div>
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🎯</span>
+            <span class="entity-name">YONALISH</span>
+            <span class="entity-tag">ASOSIY</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">yonalish_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kodi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(20) UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nomi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(200)</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">kafedra_id</span><span class="ft">INT FK→KAFEDRA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">daraja<span class="badge-nn">NN</span></span><span class="ft">ENUM(bak,mag,doc)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">talim_shakli</span><span class="ft">ENUM(kunduzgi,sirtqi)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">davomiyligi</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kredit_soni</span><span class="ft">INT</span></div>
+        </div>
+      </div>
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">👨‍🎓</span>
+            <span class="entity-name">TALABA</span>
+            <span class="entity-tag">MARKAZIY</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">talaba_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">talaba_raqam<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(20) UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">ism<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(80)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">familiya<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(80)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">otasining_ismi</span><span class="ft">VARCHAR(80)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">tug_sana</span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">jins</span><span class="ft">ENUM(erkak,ayol)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">pasport_seria</span><span class="ft">VARCHAR(15) UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">jshshir</span><span class="ft">VARCHAR(14) UQ</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">yonalish_id</span><span class="ft">INT FK→YONALISH</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kurs</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">guruh_id</span><span class="ft">INT FK→GURUH</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">qabul_yili</span><span class="ft">YEAR</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holati</span><span class="ft">ENUM(aktiv,tatil,bitirgan)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">moliya_turi<span class="badge-nn">NN</span></span><span class="ft">ENUM(grant,kontrakt)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">telefon</span><span class="ft">VARCHAR(20)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">email</span><span class="ft">VARCHAR(100)</span></div>
+        </div>
+      </div>
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">👥</span>
+            <span class="entity-name">GURUH</span>
+            <span class="entity-tag">ASOSIY</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">guruh_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">guruh_kodi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(20) UQ</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">yonalish_id</span><span class="ft">INT FK→YONALISH</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kurs</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">akademik_yil</span><span class="ft">VARCHAR(10)</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">qoshiq_id</span><span class="ft">INT FK→TALABA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">talabalar_soni</span><span class="ft">INT DEFAULT 0</span></div>
+        </div>
+      </div>
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">📖</span>
+            <span class="entity-name">FAN</span>
+            <span class="entity-tag">ASOSIY</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">fan_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kodi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(20) UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nomi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(200)</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">kafedra_id</span><span class="ft">INT FK→KAFEDRA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kredit</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">ma_saat</span><span class="ft">INT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">amaliy_saat</span><span class="ft">INT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">lab_saat</span><span class="ft">INT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">semestr</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">hisob_turi</span><span class="ft">ENUM(imtihon,zachot)</span></div>
+        </div>
+      </div>
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🗓️</span>
+            <span class="entity-name">DARS_JADVALI</span>
+            <span class="entity-tag">BOG'LOVCHI</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">jadval_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">fan_id</span><span class="ft">INT FK→FAN</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">xodim_id</span><span class="ft">INT FK→XODIM</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">guruh_id</span><span class="ft">INT FK→GURUH</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">xona_id</span><span class="ft">INT FK→XONA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kun</span><span class="ft">ENUM(du,se,cho,pa,ju,sh)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">para_raqam</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">dars_turi</span><span class="ft">ENUM(ma,amaliy,lab)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">semestr</span><span class="ft">TINYINT</span></div>
+        </div>
+      </div>
+
+      <div class="m0">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">✅</span>
+            <span class="entity-name">DAVOMAT</span>
+            <span class="entity-tag">LOG</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">davomat_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">talaba_id</span><span class="ft">INT FK→TALABA</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">jadval_id</span><span class="ft">INT FK→DARS_JADVALI</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">sana<span class="badge-nn">NN</span></span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holat<span class="badge-nn">NN</span></span><span class="ft">ENUM(keldi,kelmadi,sababli)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">izoh</span><span class="ft">TEXT</span></div>
+          <div class="divider"></div>
+          <div class="field" style="font-size:9px;color:#888;padding:4px 12px;">UQ(talaba_id, jadval_id, sana)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- XODIMLAR MODULI -->
+  <div class="module">
+    <div class="module-label">👔 Xodimlar Moduli</div>
+    <div class="grid">
+
+      <div class="m1">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">👨‍💼</span>
+            <span class="entity-name">XODIM</span>
+            <span class="entity-tag">MARKAZIY</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">xodim_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">xodim_raqam</span><span class="ft">VARCHAR(20) UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">ism<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(80)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">familiya<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(80)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">otasining_ismi</span><span class="ft">VARCHAR(80)</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">kafedra_id</span><span class="ft">INT FK→KAFEDRA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">lavozim</span><span class="ft">VARCHAR(100)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">ilmiy_daraja</span><span class="ft">ENUM(none,phd,dsc)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">unvon</span><span class="ft">ENUM(none,docent,prof)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">maosh</span><span class="ft">DECIMAL(12,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">telefon</span><span class="ft">VARCHAR(20)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">email</span><span class="ft">VARCHAR(100)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holati</span><span class="ft">ENUM(aktiv,tatil,ketgan)</span></div>
+        </div>
+      </div>
+
+      <div class="m1">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">⭐</span>
+            <span class="entity-name">BAHO</span>
+            <span class="entity-tag">LOG</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">baho_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">talaba_id</span><span class="ft">INT FK→TALABA</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">fan_id</span><span class="ft">INT FK→FAN</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">baholovchi_id</span><span class="ft">INT FK→XODIM</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">joriy_baho</span><span class="ft">DECIMAL(5,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">oraliq_baho</span><span class="ft">DECIMAL(5,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">yakuniy_baho</span><span class="ft">DECIMAL(5,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">harf_baho</span><span class="ft">ENUM(A,B,C,D,E,F)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">gpa_ball</span><span class="ft">DECIMAL(3,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">semestr<span class="badge-nn">NN</span></span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">sana</span><span class="ft">DATETIME DEFAULT NOW</span></div>
+          <div class="divider"></div>
+          <div class="field" style="font-size:9px;color:#888;padding:4px 12px;">UQ(talaba_id, fan_id, semestr)</div>
+        </div>
+      </div>
+
+      <div class="m1">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">📝</span>
+            <span class="entity-name">IMTIHON</span>
+            <span class="entity-tag">JADVAL</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">imtihon_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">fan_id</span><span class="ft">INT FK→FAN</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">guruh_id</span><span class="ft">INT FK→GURUH</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">xodim_id</span><span class="ft">INT FK→XODIM</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">xona_id</span><span class="ft">INT FK→XONA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">sana<span class="badge-nn">NN</span></span><span class="ft">DATETIME</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">turi</span><span class="ft">ENUM(imtihon,zachot)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">semestr</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holati</span><span class="ft">ENUM(rejalashtirilgan,otdi)</span></div>
+        </div>
+      </div>
+
+      <div class="m1">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🎓</span>
+            <span class="entity-name">DIPLOM_ISHI</span>
+            <span class="entity-tag">MAXSUS</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">diplom_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">talaba_id</span><span class="ft">INT FK→TALABA UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">mavzu<span class="badge-nn">NN</span></span><span class="ft">TEXT</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">rahbar_id</span><span class="ft">INT FK→XODIM</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">topshirish_sanasi</span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">himoya_sanasi</span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">baho</span><span class="ft">DECIMAL(5,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holati</span><span class="ft">ENUM(tayyorlanmoqda,himoya)</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MOLIYA MODULI -->
+  <div class="module">
+    <div class="module-label">💰 Moliya Moduli</div>
+    <div class="grid">
+
+      <div class="m2">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">💳</span>
+            <span class="entity-name">TOLOV</span>
+            <span class="entity-tag">MOLIYA</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">tolov_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">talaba_id</span><span class="ft">INT FK→TALABA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">miqdor<span class="badge-nn">NN</span></span><span class="ft">DECIMAL(15,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">turi</span><span class="ft">ENUM(kontrakt,jarima)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">usuli</span><span class="ft">ENUM(naqd,bank,online)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">sana</span><span class="ft">DATETIME DEFAULT NOW</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">kvitansiya</span><span class="ft">VARCHAR(50)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holati</span><span class="ft">ENUM(kutilmoqda,tasdiqlandi)</span></div>
+        </div>
+      </div>
+
+      <div class="m2">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🏅</span>
+            <span class="entity-name">STIPENDIYA</span>
+            <span class="entity-tag">MOLIYA</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">stip_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">talaba_id</span><span class="ft">INT FK→TALABA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">turi</span><span class="ft">ENUM(oddiy,nominal,davlat)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">miqdor<span class="badge-nn">NN</span></span><span class="ft">DECIMAL(12,2)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">boshlanish</span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">tugash</span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holati</span><span class="ft">ENUM(aktiv,bekor)</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INFRATUZILMA MODULI -->
+  <div class="module">
+    <div class="module-label">🏢 Infratuzilma Moduli</div>
+    <div class="grid">
+
+      <div class="m3">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🏢</span>
+            <span class="entity-name">BINO</span>
+            <span class="entity-tag">INFRA</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">bino_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nomi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(100)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">manzil</span><span class="ft">TEXT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">qavatlar_soni</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">turi</span><span class="ft">ENUM(oquv,lab,yotoqxona)</span></div>
+        </div>
+      </div>
+
+      <div class="m3">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">🚪</span>
+            <span class="entity-name">XONA</span>
+            <span class="entity-tag">INFRA</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">xona_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">raqami<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(20)</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">bino_id</span><span class="ft">INT FK→BINO</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">qavat</span><span class="ft">TINYINT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">sig_imkoniyat</span><span class="ft">INT</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">turi</span><span class="ft">ENUM(auditoriya,lab,konf)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">jihozlar</span><span class="ft">TEXT</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- KUTUBXONA MODULI -->
+  <div class="module">
+    <div class="module-label">📚 Kutubxona Moduli</div>
+    <div class="grid">
+
+      <div class="m4">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">📕</span>
+            <span class="entity-name">KITOB</span>
+            <span class="entity-tag">KUTUBXONA</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">kitob_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">isbn</span><span class="ft">VARCHAR(20) UQ</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nomi<span class="badge-nn">NN</span></span><span class="ft">VARCHAR(255)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">muallif</span><span class="ft">VARCHAR(200)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nashriyot</span><span class="ft">VARCHAR(150)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">nashr_yili</span><span class="ft">YEAR</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">turi</span><span class="ft">ENUM(darslik,qollanma,ilmiy)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">jami_nusxa</span><span class="ft">INT DEFAULT 1</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">mavjud_nusxa</span><span class="ft">INT DEFAULT 1</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">fan_id</span><span class="ft">INT FK→FAN (null)</span></div>
+        </div>
+      </div>
+
+      <div class="m4">
+        <div class="entity">
+          <div class="entity-head">
+            <span class="entity-icon">📋</span>
+            <span class="entity-name">KITOB_IJARA</span>
+            <span class="entity-tag">LOG</span>
+          </div>
+          <div class="field"><span class="fi pk-i">🔑</span><span class="fn pk">ijara_id</span><span class="ft">INT PK</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">kitob_id</span><span class="ft">INT FK→KITOB</span></div>
+          <div class="field"><span class="fi fk-i">⇢</span><span class="fn fk">talaba_id</span><span class="ft">INT FK→TALABA</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">olish_sanasi<span class="badge-nn">NN</span></span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">qaytarish_sanasi<span class="badge-nn">NN</span></span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">qaytarildi</span><span class="ft">DATE</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">holati</span><span class="ft">ENUM(olindi,qaytarildi,kech)</span></div>
+          <div class="field"><span class="fi at-i">◆</span><span class="fn">jarima</span><span class="ft">DECIMAL(10,2) DEFAULT 0</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /er -->
+
+<!-- ══════════════ MUNOSABATLAR ══════════════ -->
+<div class="section" id="rel">
+  <table class="rtable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Ota jadval</th>
+        <th>Bola jadval</th>
+        <th>Turi</th>
+        <th>Kalit</th>
+        <th>Tavsif (O'zbek)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>FAKULTET</td><td>KAFEDRA</td><td><span class="rtag rt-1n">1 → N</span></td><td>fakultet_id</td><td>Bir fakultetda ko'p kafedra bo'ladi</td></tr>
+      <tr><td>2</td><td>KAFEDRA</td><td>YONALISH</td><td><span class="rtag rt-1n">1 → N</span></td><td>kafedra_id</td><td>Kafedra ko'p yo'nalishga ega bo'ladi</td></tr>
+      <tr><td>3</td><td>YONALISH</td><td>TALABA</td><td><span class="rtag rt-1n">1 → N</span></td><td>yonalish_id</td><td>Yo'nalishda ko'p talaba o'qiydi</td></tr>
+      <tr><td>4</td><td>YONALISH</td><td>GURUH</td><td><span class="rtag rt-1n">1 → N</span></td><td>yonalish_id</td><td>Yo'nalish bo'yicha guruhlar tashkil etiladi</td></tr>
+      <tr><td>5</td><td>GURUH</td><td>TALABA</td><td><span class="rtag rt-1n">1 → N</span></td><td>guruh_id</td><td>Guruhda ko'p talaba bor</td></tr>
+      <tr><td>6</td><td>KAFEDRA</td><td>FAN</td><td><span class="rtag rt-1n">1 → N</span></td><td>kafedra_id</td><td>Kafedra fanlarni o'qitadi</td></tr>
+      <tr><td>7</td><td>KAFEDRA</td><td>XODIM</td><td><span class="rtag rt-1n">1 → N</span></td><td>kafedra_id</td><td>Xodim kafedraga biriktirilgan</td></tr>
+      <tr><td>8</td><td>XODIM</td><td>FAKULTET</td><td><span class="rtag rt-11">1 → 1</span></td><td>dekan_id</td><td>Fakultet dekani — bitta xodim</td></tr>
+      <tr><td>9</td><td>XODIM</td><td>KAFEDRA</td><td><span class="rtag rt-11">1 → 1</span></td><td>mudiri_id</td><td>Kafedra mudiri — bitta xodim</td></tr>
+      <tr><td>10</td><td>FAN</td><td>DARS_JADVALI</td><td><span class="rtag rt-1n">1 → N</span></td><td>fan_id</td><td>Fan dars jadvalida ko'p marta bo'lishi mumkin</td></tr>
+      <tr><td>11</td><td>XODIM</td><td>DARS_JADVALI</td><td><span class="rtag rt-1n">1 → N</span></td><td>xodim_id</td><td>O'qituvchi ko'p dars o'tadi</td></tr>
+      <tr><td>12</td><td>GURUH</td><td>DARS_JADVALI</td><td><span class="rtag rt-1n">1 → N</span></td><td>guruh_id</td><td>Guruh ko'p darsga ega</td></tr>
+      <tr><td>13</td><td>XONA</td><td>DARS_JADVALI</td><td><span class="rtag rt-1n">1 → N</span></td><td>xona_id</td><td>Xonada ko'p dars o'tkaziladi</td></tr>
+      <tr><td>14</td><td>TALABA</td><td>DAVOMAT</td><td><span class="rtag rt-1n">1 → N</span></td><td>talaba_id</td><td>Talabaning har bir dars davomati saqlanadi</td></tr>
+      <tr><td>15</td><td>DARS_JADVALI</td><td>DAVOMAT</td><td><span class="rtag rt-1n">1 → N</span></td><td>jadval_id</td><td>Har bir darsda davomat qayd etiladi</td></tr>
+      <tr><td>16</td><td>TALABA</td><td>BAHO</td><td><span class="rtag rt-1n">1 → N</span></td><td>talaba_id</td><td>Talabaning har bir fan bo'yicha bahosi</td></tr>
+      <tr><td>17</td><td>FAN</td><td>BAHO</td><td><span class="rtag rt-1n">1 → N</span></td><td>fan_id</td><td>Fan bo'yicha ko'p baho qayd etiladi</td></tr>
+      <tr><td>18</td><td>XODIM</td><td>BAHO</td><td><span class="rtag rt-1n">1 → N</span></td><td>baholovchi_id</td><td>O'qituvchi ko'p baho beradi</td></tr>
+      <tr><td>19</td><td>FAN</td><td>IMTIHON</td><td><span class="rtag rt-1n">1 → N</span></td><td>fan_id</td><td>Fan bo'yicha imtihon o'tkaziladi</td></tr>
+      <tr><td>20</td><td>GURUH</td><td>IMTIHON</td><td><span class="rtag rt-1n">1 → N</span></td><td>guruh_id</td><td>Guruh imtihon topshiradi</td></tr>
+      <tr><td>21</td><td>TALABA</td><td>DIPLOM_ISHI</td><td><span class="rtag rt-11">1 → 1</span></td><td>talaba_id</td><td>Har bir talabaning bitta diplom ishi</td></tr>
+      <tr><td>22</td><td>XODIM</td><td>DIPLOM_ISHI</td><td><span class="rtag rt-1n">1 → N</span></td><td>rahbar_id</td><td>O'qituvchi ko'p diplom ishiga rahbarlik qiladi</td></tr>
+      <tr><td>23</td><td>TALABA</td><td>TOLOV</td><td><span class="rtag rt-1n">1 → N</span></td><td>talaba_id</td><td>Talabaning kontrakt to'lovlari</td></tr>
+      <tr><td>24</td><td>TALABA</td><td>STIPENDIYA</td><td><span class="rtag rt-1n">1 → N</span></td><td>talaba_id</td><td>Talabaga stipendiya tayinlanadi</td></tr>
+      <tr><td>25</td><td>BINO</td><td>XONA</td><td><span class="rtag rt-1n">1 → N</span></td><td>bino_id</td><td>Bino ichida ko'p xona bo'ladi</td></tr>
+      <tr><td>26</td><td>FAN</td><td>KITOB</td><td><span class="rtag rt-1n">1 → N</span></td><td>fan_id</td><td>Fan uchun mo'ljallangan kitoblar</td></tr>
+      <tr><td>27</td><td>KITOB</td><td>KITOB_IJARA</td><td><span class="rtag rt-1n">1 → N</span></td><td>kitob_id</td><td>Kitob ko'p marta ijaraga berilishi mumkin</td></tr>
+      <tr><td>28</td><td>TALABA</td><td>KITOB_IJARA</td><td><span class="rtag rt-1n">1 → N</span></td><td>talaba_id</td><td>Talaba ko'p kitob olishi mumkin</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════ NORMALIZATSIYA ══════════════ -->
+<div class="section" id="norm">
+  <div class="norm-grid">
+
+    <div class="norm-card">
+      <div class="norm-title" style="color:var(--blue)">📐 1NF — Birinchi Normal Shakl</div>
+      <div class="norm-rule">Har bir ustun atomik (bo'linmas) qiymatlar saqlaydi</div>
+      <div class="norm-rule">Takrorlanuvchi guruhlar yo'q (masalan, telefon1, telefon2 emas — alohida jadval)</div>
+      <div class="norm-rule">Har bir satrda bitta asosiy kalit (PK) mavjud</div>
+      <div class="norm-rule">Barcha ustunlar bir xil turdagi qiymatlar saqlaydi</div>
+      <div style="margin-top:10px;font-size:10px;color:var(--ink2);padding:8px;background:var(--bg);border:1px solid var(--border)">
+        Misol: TALABA jadvalida telefon alohida ustun (VARCHAR), massiv emas
+      </div>
+    </div>
+
+    <div class="norm-card">
+      <div class="norm-title" style="color:var(--red)">📐 2NF — Ikkinchi Normal Shakl</div>
+      <div class="norm-rule">1NF shartlari bajarilgan</div>
+      <div class="norm-rule">Har bir atribut to'liq PK ga bog'liq (qisman bog'liqlik yo'q)</div>
+      <div class="norm-rule">Kompozit PK bo'lsa — qisman bog'liqliklar alohida jadvalga chiqarilgan</div>
+      <div class="norm-rule">BAHO jadvalida baho → talaba_id va fan_id ga bog'liq, alohida emas</div>
+      <div style="margin-top:10px;font-size:10px;color:var(--ink2);padding:8px;background:var(--bg);border:1px solid var(--border)">
+        Misol: DAVOMAT jadvalida UQ(talaba_id, jadval_id, sana) — kompozit kalit
+      </div>
+    </div>
+
+    <div class="norm-card">
+      <div class="norm-title" style="color:var(--green)">📐 3NF — Uchinchi Normal Shakl</div>
+      <div class="norm-rule">2NF shartlari bajarilgan</div>
+      <div class="norm-rule">Tranzitiv bog'liqlik yo'q (A→B→C bo'lsa, C alohida jadvalga)</div>
+      <div class="norm-rule">PK bo'lmagan ustunlar faqat PKga bog'liq</div>
+      <div class="norm-rule">Fakultet nomi → Kafedra → Yo'nalish: har biri alohida jadvalda</div>
+      <div style="margin-top:10px;font-size:10px;color:var(--ink2);padding:8px;background:var(--bg);border:1px solid var(--border)">
+        Misol: TALABA jadvalida fakultet_nomi yo'q — FK orqali FAKULTET jadvaliga bog'langan
+      </div>
+    </div>
+
+    <div class="norm-card">
+      <div class="norm-title" style="color:var(--gold)">🔑 Kalit Turlari</div>
+      <div class="norm-rule"><strong>PK (Primary Key)</strong> — har bir jadvalda bitta, NULL bo'lmaydi, AUTO_INCREMENT</div>
+      <div class="norm-rule"><strong>FK (Foreign Key)</strong> — boshqa jadvalning PKga ishora, referensial yaxlitlik</div>
+      <div class="norm-rule"><strong>UQ (Unique Key)</strong> — takrorlanmaydigan qiymat (pasport, email)</div>
+      <div class="norm-rule"><strong>Kompozit PK</strong> — ikki va undan ko'p ustundan tashkil topgan kalit</div>
+    </div>
+
+    <div class="norm-card">
+      <div class="norm-title" style="color:#7b2d8b">🔗 Munosabat Turlari</div>
+      <div class="norm-rule"><strong>1:1</strong> — Talaba ↔ DiplomIshi (har biriga bitta)</div>
+      <div class="norm-rule"><strong>1:N</strong> — Fakultet → Kafedra (eng ko'p ishlatiladigan)</div>
+      <div class="norm-rule"><strong>N:M</strong> — Talaba ↔ Fan (BAHO jadvali orqali hal qilinadi)</div>
+      <div class="norm-rule">N:M munosabat bog'lovchi jadval orqali 2 ta 1:N ga aylantiriladi</div>
+    </div>
+
+    <div class="norm-card">
+      <div class="norm-title">⚠️ Yaxlitlik Cheklovlari</div>
+      <div class="norm-rule"><strong>NOT NULL</strong> — majburiy to'ldiriladigan ustunlar</div>
+      <div class="norm-rule"><strong>UNIQUE</strong> — takrorlanmaydigan: pasport, email, talaba_raqam</div>
+      <div class="norm-rule"><strong>CHECK</strong> — qiymat diapazoni: baho 0-100 orasida</div>
+      <div class="norm-rule"><strong>DEFAULT</strong> — standart qiymat: holati = 'aktiv'</div>
+      <div class="norm-rule"><strong>CASCADE</strong> — ota o'chirilsa, bolalar ham o'chadi (yoki SET NULL)</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ SQL ══════════════ -->
+<div class="section" id="sql">
+
+  <div class="sql-wrap">
+    <div class="sql-bar">
+      <span class="sql-title">fdtu_talabalar.sql — To'liq DDL Skript</span>
+      <button class="copy-btn" onclick="copyAll()">📋 Hammasini nusxa ol</button>
+    </div>
+    <div class="sql-code" id="sqlAll">
+<span class="cm">-- ================================================
+-- FDTU TALABALAR AXBOROT TIZIMI
+-- Farg'ona Davlat Texnika Universiteti
+-- Relyatsion Model | 3NF | 17 ta jadval
+-- ================================================</span>
+
+<span class="kw">CREATE DATABASE IF NOT EXISTS</span> <span class="tb">fdtu_db</span>
+  <span class="kw">CHARACTER SET</span> utf8mb4 <span class="kw">COLLATE</span> utf8mb4_unicode_ci;
+<span class="kw">USE</span> <span class="tb">fdtu_db</span>;
+
+<span class="cm">-- 1. BINO</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">bino</span> (
+  bino_id       <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  nomi          <span class="tp">VARCHAR(100) NOT NULL</span>,
+  manzil        <span class="tp">TEXT</span>,
+  qavatlar_soni <span class="tp">TINYINT</span>,
+  turi          <span class="tp">ENUM</span>(<span class="st">'oquv','laboratoriya','yotoqxona','idora'</span>)
+);
+
+<span class="cm">-- 2. XONA</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">xona</span> (
+  xona_id       <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  raqami        <span class="tp">VARCHAR(20) NOT NULL</span>,
+  bino_id       <span class="tp">INT NOT NULL</span>,
+  qavat         <span class="tp">TINYINT</span>,
+  sig_imkoniyat <span class="tp">INT</span>,
+  turi          <span class="tp">ENUM</span>(<span class="st">'auditoriya','laboratoriya','konferens'</span>),
+  jihozlar      <span class="tp">TEXT</span>,
+  <span class="cn">FOREIGN KEY</span> (bino_id) <span class="kw">REFERENCES</span> <span class="tb">bino</span>(bino_id)
+);
+
+<span class="cm">-- 3. FAKULTET (dekan_id keyinroq ALTER bilan)</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">fakultet</span> (
+  fakultet_id  <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  nomi         <span class="tp">VARCHAR(150) NOT NULL</span>,
+  qisqartma    <span class="tp">VARCHAR(10) UNIQUE</span>,
+  tashkil_yili <span class="tp">YEAR</span>,
+  dekan_id     <span class="tp">INT</span>,
+  telefon      <span class="tp">VARCHAR(20)</span>,
+  email        <span class="tp">VARCHAR(100)</span>
+);
+
+<span class="cm">-- 4. KAFEDRA</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">kafedra</span> (
+  kafedra_id   <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  nomi         <span class="tp">VARCHAR(150) NOT NULL</span>,
+  fakultet_id  <span class="tp">INT NOT NULL</span>,
+  mudiri_id    <span class="tp">INT</span>,
+  tashkil_yili <span class="tp">YEAR</span>,
+  email        <span class="tp">VARCHAR(100)</span>,
+  <span class="cn">FOREIGN KEY</span> (fakultet_id) <span class="kw">REFERENCES</span> <span class="tb">fakultet</span>(fakultet_id)
+);
+
+<span class="cm">-- 5. YONALISH</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">yonalish</span> (
+  yonalish_id  <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  kodi         <span class="tp">VARCHAR(20) UNIQUE NOT NULL</span>,
+  nomi         <span class="tp">VARCHAR(200) NOT NULL</span>,
+  kafedra_id   <span class="tp">INT NOT NULL</span>,
+  daraja       <span class="tp">ENUM</span>(<span class="st">'bakalavr','magistr','doktorantura'</span>) <span class="tp">NOT NULL</span>,
+  talim_shakli <span class="tp">ENUM</span>(<span class="st">'kunduzgi','sirtqi'</span>) <span class="tp">DEFAULT</span> <span class="st">'kunduzgi'</span>,
+  davomiyligi  <span class="tp">TINYINT</span>,
+  kredit_soni  <span class="tp">INT</span>,
+  <span class="cn">FOREIGN KEY</span> (kafedra_id) <span class="kw">REFERENCES</span> <span class="tb">kafedra</span>(kafedra_id)
+);
+
+<span class="cm">-- 6. XODIM</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">xodim</span> (
+  xodim_id       <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  xodim_raqam    <span class="tp">VARCHAR(20) UNIQUE</span>,
+  ism            <span class="tp">VARCHAR(80) NOT NULL</span>,
+  familiya       <span class="tp">VARCHAR(80) NOT NULL</span>,
+  otasining_ismi <span class="tp">VARCHAR(80)</span>,
+  kafedra_id     <span class="tp">INT</span>,
+  lavozim        <span class="tp">VARCHAR(100)</span>,
+  ilmiy_daraja   <span class="tp">ENUM</span>(<span class="st">'none','magistr','phd','dsc'</span>) <span class="tp">DEFAULT</span> <span class="st">'none'</span>,
+  unvon          <span class="tp">ENUM</span>(<span class="st">'none','docent','professor'</span>) <span class="tp">DEFAULT</span> <span class="st">'none'</span>,
+  maosh          <span class="tp">DECIMAL(12,2)</span>,
+  telefon        <span class="tp">VARCHAR(20)</span>,
+  email          <span class="tp">VARCHAR(100)</span>,
+  holati         <span class="tp">ENUM</span>(<span class="st">'aktiv','tatil','ketgan'</span>) <span class="tp">DEFAULT</span> <span class="st">'aktiv'</span>,
+  <span class="cn">FOREIGN KEY</span> (kafedra_id) <span class="kw">REFERENCES</span> <span class="tb">kafedra</span>(kafedra_id)
+);
+
+<span class="cm">-- FK (circular dependency yechimi)</span>
+<span class="kw">ALTER TABLE</span> <span class="tb">fakultet</span> <span class="kw">ADD CONSTRAINT</span> fk_dekan
+  <span class="cn">FOREIGN KEY</span> (dekan_id) <span class="kw">REFERENCES</span> <span class="tb">xodim</span>(xodim_id);
+<span class="kw">ALTER TABLE</span> <span class="tb">kafedra</span> <span class="kw">ADD CONSTRAINT</span> fk_mudiri
+  <span class="cn">FOREIGN KEY</span> (mudiri_id) <span class="kw">REFERENCES</span> <span class="tb">xodim</span>(xodim_id);
+
+<span class="cm">-- 7. GURUH</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">guruh</span> (
+  guruh_id       <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  guruh_kodi     <span class="tp">VARCHAR(20) UNIQUE NOT NULL</span>,
+  yonalish_id    <span class="tp">INT NOT NULL</span>,
+  kurs           <span class="tp">TINYINT</span>,
+  akademik_yil   <span class="tp">VARCHAR(10)</span>,
+  qoshiq_id      <span class="tp">INT</span>,
+  talabalar_soni <span class="tp">INT DEFAULT 0</span>,
+  <span class="cn">FOREIGN KEY</span> (yonalish_id) <span class="kw">REFERENCES</span> <span class="tb">yonalish</span>(yonalish_id)
+);
+
+<span class="cm">-- 8. TALABA</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">talaba</span> (
+  talaba_id        <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  talaba_raqam     <span class="tp">VARCHAR(20) UNIQUE NOT NULL</span>,
+  ism              <span class="tp">VARCHAR(80) NOT NULL</span>,
+  familiya         <span class="tp">VARCHAR(80) NOT NULL</span>,
+  otasining_ismi   <span class="tp">VARCHAR(80)</span>,
+  tug_sana         <span class="tp">DATE</span>,
+  jins             <span class="tp">ENUM</span>(<span class="st">'erkak','ayol'</span>),
+  pasport_seria    <span class="tp">VARCHAR(15) UNIQUE</span>,
+  jshshir          <span class="tp">VARCHAR(14) UNIQUE</span>,
+  yonalish_id      <span class="tp">INT NOT NULL</span>,
+  kurs             <span class="tp">TINYINT</span>,
+  guruh_id         <span class="tp">INT</span>,
+  qabul_yili       <span class="tp">YEAR</span>,
+  holati           <span class="tp">ENUM</span>(<span class="st">'aktiv','tatil','chiqarilgan','bitirgan'</span>) <span class="tp">DEFAULT</span> <span class="st">'aktiv'</span>,
+  moliya_turi      <span class="tp">ENUM</span>(<span class="st">'grant','kontrakt'</span>) <span class="tp">NOT NULL</span>,
+  telefon          <span class="tp">VARCHAR(20)</span>,
+  email            <span class="tp">VARCHAR(100)</span>,
+  yaratilgan       <span class="tp">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+  <span class="cn">FOREIGN KEY</span> (yonalish_id) <span class="kw">REFERENCES</span> <span class="tb">yonalish</span>(yonalish_id),
+  <span class="cn">FOREIGN KEY</span> (guruh_id) <span class="kw">REFERENCES</span> <span class="tb">guruh</span>(guruh_id)
+);
+
+<span class="cm">-- Guruhning qoshiq talaba FK</span>
+<span class="kw">ALTER TABLE</span> <span class="tb">guruh</span> <span class="kw">ADD CONSTRAINT</span> fk_qoshiq
+  <span class="cn">FOREIGN KEY</span> (qoshiq_id) <span class="kw">REFERENCES</span> <span class="tb">talaba</span>(talaba_id);
+
+<span class="cm">-- 9. FAN</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">fan</span> (
+  fan_id        <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  kodi          <span class="tp">VARCHAR(20) UNIQUE NOT NULL</span>,
+  nomi          <span class="tp">VARCHAR(200) NOT NULL</span>,
+  kafedra_id    <span class="tp">INT NOT NULL</span>,
+  kredit        <span class="tp">TINYINT</span>,
+  ma_saat       <span class="tp">INT</span>,
+  amaliy_saat   <span class="tp">INT</span>,
+  lab_saat      <span class="tp">INT</span>,
+  semestr       <span class="tp">TINYINT</span>,
+  hisob_turi    <span class="tp">ENUM</span>(<span class="st">'imtihon','zachot'</span>) <span class="tp">DEFAULT</span> <span class="st">'imtihon'</span>,
+  <span class="cn">FOREIGN KEY</span> (kafedra_id) <span class="kw">REFERENCES</span> <span class="tb">kafedra</span>(kafedra_id)
+);
+
+<span class="cm">-- 10. DARS_JADVALI</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">dars_jadvali</span> (
+  jadval_id  <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  fan_id     <span class="tp">INT NOT NULL</span>,
+  xodim_id   <span class="tp">INT NOT NULL</span>,
+  guruh_id   <span class="tp">INT NOT NULL</span>,
+  xona_id    <span class="tp">INT NOT NULL</span>,
+  kun        <span class="tp">ENUM</span>(<span class="st">'dushanba','seshanba','chorshanba','payshanba','juma','shanba'</span>),
+  para_raqam <span class="tp">TINYINT</span>,
+  dars_turi  <span class="tp">ENUM</span>(<span class="st">'ma','amaliy','laboratoriya'</span>),
+  semestr    <span class="tp">TINYINT</span>,
+  <span class="cn">FOREIGN KEY</span> (fan_id)   <span class="kw">REFERENCES</span> <span class="tb">fan</span>(fan_id),
+  <span class="cn">FOREIGN KEY</span> (xodim_id) <span class="kw">REFERENCES</span> <span class="tb">xodim</span>(xodim_id),
+  <span class="cn">FOREIGN KEY</span> (guruh_id) <span class="kw">REFERENCES</span> <span class="tb">guruh</span>(guruh_id),
+  <span class="cn">FOREIGN KEY</span> (xona_id)  <span class="kw">REFERENCES</span> <span class="tb">xona</span>(xona_id)
+);
+
+<span class="cm">-- 11. DAVOMAT</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">davomat</span> (
+  davomat_id <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  talaba_id  <span class="tp">INT NOT NULL</span>,
+  jadval_id  <span class="tp">INT NOT NULL</span>,
+  sana       <span class="tp">DATE NOT NULL</span>,
+  holat      <span class="tp">ENUM</span>(<span class="st">'keldi','kelmadi','kech_keldi','sababli'</span>) <span class="tp">NOT NULL</span>,
+  izoh       <span class="tp">TEXT</span>,
+  <span class="cn">UNIQUE KEY</span> uq_davomat (talaba_id, jadval_id, sana),
+  <span class="cn">FOREIGN KEY</span> (talaba_id) <span class="kw">REFERENCES</span> <span class="tb">talaba</span>(talaba_id),
+  <span class="cn">FOREIGN KEY</span> (jadval_id) <span class="kw">REFERENCES</span> <span class="tb">dars_jadvali</span>(jadval_id)
+);
+
+<span class="cm">-- 12. IMTIHON</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">imtihon</span> (
+  imtihon_id <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  fan_id     <span class="tp">INT NOT NULL</span>,
+  guruh_id   <span class="tp">INT NOT NULL</span>,
+  xodim_id   <span class="tp">INT NOT NULL</span>,
+  xona_id    <span class="tp">INT</span>,
+  sana       <span class="tp">DATETIME NOT NULL</span>,
+  turi       <span class="tp">ENUM</span>(<span class="st">'imtihon','zachot','kursavoy'</span>),
+  semestr    <span class="tp">TINYINT</span>,
+  holati     <span class="tp">ENUM</span>(<span class="st">'rejalashtirilgan','otdi','bekor'</span>) <span class="tp">DEFAULT</span> <span class="st">'rejalashtirilgan'</span>,
+  <span class="cn">FOREIGN KEY</span> (fan_id)   <span class="kw">REFERENCES</span> <span class="tb">fan</span>(fan_id),
+  <span class="cn">FOREIGN KEY</span> (guruh_id) <span class="kw">REFERENCES</span> <span class="tb">guruh</span>(guruh_id),
+  <span class="cn">FOREIGN KEY</span> (xodim_id) <span class="kw">REFERENCES</span> <span class="tb">xodim</span>(xodim_id),
+  <span class="cn">FOREIGN KEY</span> (xona_id)  <span class="kw">REFERENCES</span> <span class="tb">xona</span>(xona_id)
+);
+
+<span class="cm">-- 13. BAHO</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">baho</span> (
+  baho_id       <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  talaba_id     <span class="tp">INT NOT NULL</span>,
+  fan_id        <span class="tp">INT NOT NULL</span>,
+  baholovchi_id <span class="tp">INT</span>,
+  joriy_baho    <span class="tp">DECIMAL(5,2)</span>,
+  oraliq_baho   <span class="tp">DECIMAL(5,2)</span>,
+  yakuniy_baho  <span class="tp">DECIMAL(5,2)</span>,
+  harf_baho     <span class="tp">ENUM</span>(<span class="st">'A','B','C','D','E','F'</span>),
+  gpa_ball      <span class="tp">DECIMAL(3,2)</span>,
+  semestr       <span class="tp">TINYINT NOT NULL</span>,
+  sana          <span class="tp">DATETIME DEFAULT CURRENT_TIMESTAMP</span>,
+  <span class="cn">UNIQUE KEY</span> uq_baho (talaba_id, fan_id, semestr),
+  <span class="cn">FOREIGN KEY</span> (talaba_id)     <span class="kw">REFERENCES</span> <span class="tb">talaba</span>(talaba_id),
+  <span class="cn">FOREIGN KEY</span> (fan_id)        <span class="kw">REFERENCES</span> <span class="tb">fan</span>(fan_id),
+  <span class="cn">FOREIGN KEY</span> (baholovchi_id) <span class="kw">REFERENCES</span> <span class="tb">xodim</span>(xodim_id)
+);
+
+<span class="cm">-- 14. DIPLOM_ISHI</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">diplom_ishi</span> (
+  diplom_id         <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  talaba_id         <span class="tp">INT UNIQUE NOT NULL</span>,
+  mavzu             <span class="tp">TEXT NOT NULL</span>,
+  rahbar_id         <span class="tp">INT NOT NULL</span>,
+  topshirish_sanasi <span class="tp">DATE</span>,
+  himoya_sanasi     <span class="tp">DATE</span>,
+  baho              <span class="tp">DECIMAL(5,2)</span>,
+  holati            <span class="tp">ENUM</span>(<span class="st">'tayyorlanmoqda','topshirildi','himoya_qilindi'</span>)
+                    <span class="tp">DEFAULT</span> <span class="st">'tayyorlanmoqda'</span>,
+  <span class="cn">FOREIGN KEY</span> (talaba_id) <span class="kw">REFERENCES</span> <span class="tb">talaba</span>(talaba_id),
+  <span class="cn">FOREIGN KEY</span> (rahbar_id) <span class="kw">REFERENCES</span> <span class="tb">xodim</span>(xodim_id)
+);
+
+<span class="cm">-- 15. TOLOV</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">tolov</span> (
+  tolov_id   <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  talaba_id  <span class="tp">INT NOT NULL</span>,
+  miqdor     <span class="tp">DECIMAL(15,2) NOT NULL</span>,
+  turi       <span class="tp">ENUM</span>(<span class="st">'kontrakt','qayta_qabul','jarima'</span>),
+  usuli      <span class="tp">ENUM</span>(<span class="st">'naqd','bank','online'</span>),
+  sana       <span class="tp">DATETIME DEFAULT CURRENT_TIMESTAMP</span>,
+  kvitansiya <span class="tp">VARCHAR(50)</span>,
+  holati     <span class="tp">ENUM</span>(<span class="st">'kutilmoqda','tasdiqlandi','bekor'</span>) <span class="tp">DEFAULT</span> <span class="st">'kutilmoqda'</span>,
+  <span class="cn">FOREIGN KEY</span> (talaba_id) <span class="kw">REFERENCES</span> <span class="tb">talaba</span>(talaba_id)
+);
+
+<span class="cm">-- 16. STIPENDIYA</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">stipendiya</span> (
+  stip_id    <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  talaba_id  <span class="tp">INT NOT NULL</span>,
+  turi       <span class="tp">ENUM</span>(<span class="st">'oddiy','nominal','davlat','prezident'</span>),
+  miqdor     <span class="tp">DECIMAL(12,2) NOT NULL</span>,
+  boshlanish <span class="tp">DATE</span>,
+  tugash     <span class="tp">DATE</span>,
+  holati     <span class="tp">ENUM</span>(<span class="st">'aktiv','bekor','yakunlangan'</span>) <span class="tp">DEFAULT</span> <span class="st">'aktiv'</span>,
+  <span class="cn">FOREIGN KEY</span> (talaba_id) <span class="kw">REFERENCES</span> <span class="tb">talaba</span>(talaba_id)
+);
+
+<span class="cm">-- 17. KITOB</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">kitob</span> (
+  kitob_id     <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  isbn         <span class="tp">VARCHAR(20) UNIQUE</span>,
+  nomi         <span class="tp">VARCHAR(255) NOT NULL</span>,
+  muallif      <span class="tp">VARCHAR(200)</span>,
+  nashriyot    <span class="tp">VARCHAR(150)</span>,
+  nashr_yili   <span class="tp">YEAR</span>,
+  turi         <span class="tp">ENUM</span>(<span class="st">'darslik','qollanma','ilmiy','badiiy'</span>),
+  jami_nusxa   <span class="tp">INT DEFAULT 1</span>,
+  mavjud_nusxa <span class="tp">INT DEFAULT 1</span>,
+  fan_id       <span class="tp">INT</span>,
+  <span class="cn">FOREIGN KEY</span> (fan_id) <span class="kw">REFERENCES</span> <span class="tb">fan</span>(fan_id)
+);
+
+<span class="cm">-- 18. KITOB_IJARA</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">kitob_ijara</span> (
+  ijara_id         <span class="tp">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  kitob_id         <span class="tp">INT NOT NULL</span>,
+  talaba_id        <span class="tp">INT NOT NULL</span>,
+  olish_sanasi     <span class="tp">DATE NOT NULL</span>,
+  qaytarish_sanasi <span class="tp">DATE NOT NULL</span>,
+  qaytarildi       <span class="tp">DATE</span>,
+  holati           <span class="tp">ENUM</span>(<span class="st">'olindi','qaytarildi','kechiktirilgan'</span>) <span class="tp">DEFAULT</span> <span class="st">'olindi'</span>,
+  jarima           <span class="tp">DECIMAL(10,2) DEFAULT 0</span>,
+  <span class="cn">FOREIGN KEY</span> (kitob_id)  <span class="kw">REFERENCES</span> <span class="tb">kitob</span>(kitob_id),
+  <span class="cn">FOREIGN KEY</span> (talaba_id) <span class="kw">REFERENCES</span> <span class="tb">talaba</span>(talaba_id)
+);
+
+<span class="cm">-- ================================================
+-- VIEW'LAR
+-- ================================================</span>
+
+<span class="cm">-- Talabalar to'liq ma'lumot</span>
+<span class="kw">CREATE VIEW</span> <span class="tb">v_talabalar</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> t.talaba_id, t.talaba_raqam,
+  <span class="kw">CONCAT</span>(t.familiya,<span class="st">' '</span>,t.ism) <span class="kw">AS</span> tolit_ismi,
+  y.nomi <span class="kw">AS</span> yonalish, f.qisqartma <span class="kw">AS</span> fakultet,
+  t.kurs, t.holati, t.moliya_turi
+<span class="kw">FROM</span> <span class="tb">talaba</span> t
+<span class="kw">JOIN</span> <span class="tb">yonalish</span> y <span class="kw">ON</span> t.yonalish_id = y.yonalish_id
+<span class="kw">JOIN</span> <span class="tb">kafedra</span>  k <span class="kw">ON</span> y.kafedra_id  = k.kafedra_id
+<span class="kw">JOIN</span> <span class="tb">fakultet</span> f <span class="kw">ON</span> k.fakultet_id = f.fakultet_id;
+
+<span class="cm">-- GPA reytingi</span>
+<span class="kw">CREATE VIEW</span> <span class="tb">v_gpa_reyting</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> t.talaba_raqam,
+  <span class="kw">CONCAT</span>(t.familiya,<span class="st">' '</span>,t.ism) <span class="kw">AS</span> ismi,
+  <span class="kw">ROUND</span>(<span class="kw">AVG</span>(b.gpa_ball),2) <span class="kw">AS</span> gpa,
+  <span class="kw">COUNT</span>(b.baho_id) <span class="kw">AS</span> fanlar_soni
+<span class="kw">FROM</span> <span class="tb">talaba</span> t
+<span class="kw">LEFT JOIN</span> <span class="tb">baho</span> b <span class="kw">ON</span> t.talaba_id = b.talaba_id
+<span class="kw">GROUP BY</span> t.talaba_id
+<span class="kw">ORDER BY</span> gpa <span class="kw">DESC</span>;
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /content -->
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function copyAll() {
+  const txt = document.getElementById('sqlAll').innerText;
+  navigator.clipboard.writeText(txt).then(() => {
+    const b = event.target;
+    b.textContent = '✅ Nusxa olindi!';
+    setTimeout(() => b.textContent = '📋 Hammasini nusxa ol', 2000);
+  });
+}
+</script>
+</body>
+</html>
